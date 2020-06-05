@@ -1,0 +1,17 @@
+{
+  "name": "l;mf",
+  "description": "topic description",
+  "sourceProperties": {
+    "sources": [
+      {
+        "sourceType": "web",
+        "sourceProperties": {
+          "url": "github.com",
+          "title": "s;dsfg",
+          "description": "sfgsfgsfrgv"
+        },
+        "resourceType": "Self-Service Tools"
+      }
+    ]
+  }
+}
