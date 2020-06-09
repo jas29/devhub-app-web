@@ -1,0 +1,20 @@
+{
+  "name": "random",
+  "description": "topic description",
+  "sourceProperties": {
+    "sources": [
+      {
+        "sourceType": "github",
+        "sourceProperties": {
+          "url": "https://github.com",
+          "owner": "jas29",
+          "repo": "devhub app web",
+          "files": [
+            "/comp/drv"
+          ]
+        },
+        "resourceType": "Documentation"
+      }
+    ]
+  }
+}
