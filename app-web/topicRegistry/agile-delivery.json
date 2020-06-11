@@ -1,0 +1,29 @@
+{
+  "name": "agile delivery ",
+  "description": "topic description",
+  "sourceProperties": {
+    "sources": [
+      {
+        "sourceType": "web",
+        "sourceProperties": {
+          "url": "https://github.com",
+          "title": "title",
+          "description": "some source description"
+        },
+        "resourceType": "Self-Service Tools"
+      },
+      {
+        "sourceType": "github",
+        "sourceProperties": {
+          "url": "https://google.com",
+          "owner": "jas29",
+          "repo": "dev huna pp web",
+          "files": [
+            "/comp/skldf/sdklfms/dfg"
+          ]
+        },
+        "resourceType": "Documentation"
+      }
+    ]
+  }
+}
