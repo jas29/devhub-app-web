@@ -1,0 +1,17 @@
+{
+  "name": "agile delivery ",
+  "description": "topic description",
+  "sourceProperties": {
+    "sources": [
+      {
+        "sourceType": "web",
+        "sourceProperties": {
+          "url": "https://google.com",
+          "title": "title",
+          "description": "description"
+        },
+        "resourceType": "Documentation"
+      }
+    ]
+  }
+}
