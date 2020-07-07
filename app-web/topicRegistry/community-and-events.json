@@ -1,72 +1,58 @@
 {
   "name": "Community and Events",
   "description": "Tools and events that foster collaboration and communication across the BC Gov developer community.",
-  "attributes": {
-    "personas": [
-      "Developer",
-      "Designer",
-      "Product Owner"
-    ]
-  },
   "sourceProperties": {
     "sources": [
       {
         "sourceType": "web",
-        "resourceType": "Repositories",
+        "sourceProperties": {
+          "url": "https://bcgov.github.io/ExchangeLabOps/Lab-Learning-Programs/README.html",
+          "title": "Exchange Lab Ops Learning Programs",
+          "description": "Find out about the different Lab Training programs and how you may sign up!"
+        }
+      },
+      {
+        "sourceType": "web",
         "sourceProperties": {
           "url": "https://github.com/bcdevops/devops-platform-workshops",
           "title": "Openshift 101/201 Course Materials",
           "description": "Everything from labs, slide decks, to learning materials and guidebooks for facilitators is available as opensource 🔥🔥"
-        },
-        "attributes": {
-          "labels": ["type=workshop"],
-          "personas": ["Product Owner", "Facilitators"]
         }
       },
       {
         "sourceType": "web",
-        "resourceType": "Self-Service Tools",
         "sourceProperties": {
           "url": "https://www.bcdevexchange.org",
           "title": "BC Developers Exchange",
-          "description": "Finding better ways for government and developers to work together.",
-          "image": "https://www.bcdevexchange.org/modules/core/client/img/logo/new-logo.svg"
+          "description": "Finding better ways for government and developers to work together."
         }
       },
       {
         "sourceType": "web",
-        "resourceType": "Self-Service Tools",
         "sourceProperties": {
           "url": "https://www.yammer.com/gov.bc.ca/#/threads/inGroup?type=in_group&feedId=11241672&view=all",
-          "author": "kelpisland",
           "title": "DevOps Commons Yammer Group",
-          "description": "The DevOps Commons Group in the BC Gov Yammer community is an online community focused on growing and evolving the BCGov DevOps community.",
-          "image": "https://upload.wikimedia.org/wikipedia/commons/0/09/Yammer_logo.svg"
+          "description": "The DevOps Commons Group in the BC Gov Yammer community is an online community focused on growing and evolving the BCGov DevOps community."
         }
       },
       {
         "sourceType": "web",
-        "resourceType": "Events",
         "sourceProperties": {
           "url": "https://www.meetup.com/DevOps-Commons/",
           "title": "DevOps Commons MeetUp",
-          "description": "The DevOps Commons MeetUp is the in-person forum focused on growing and evolving the BCGov DevOps community.",
-          "image": "https://secure.meetupstatic.com/photos/event/3/9/f/f/600_471194847.jpeg"
+          "description": "The DevOps Commons MeetUp is the in-person forum focused on growing and evolving the BCGov DevOps community."
         }
       },
       {
         "sourceType": "web",
-        "resourceType": "Events",
         "sourceProperties": {
           "url": "https://www.meetup.com/Cloud-Native-Victoria/",
           "title": "Cloud Native Victoria MeetUp",
-          "description": "Cloud Native Victoria is the official Cloud Native Computing Foundation (CNCF) Meetup group dedicated to building a strong, open, diverse developer community around the Cloud Native platform and technologies in Victoria.",
-          "image": "https://secure.meetupstatic.com/photos/event/4/f/e/6/highres_453200454.jpeg"
+          "description": "Cloud Native Victoria is the official Cloud Native Computing Foundation (CNCF) Meetup group dedicated to building a strong, open, diverse developer community around the Cloud Native platform and technologies in Victoria."
         }
       },
       {
         "sourceType": "web",
-        "resourceType": "Events",
         "sourceProperties": {
           "url": "https://www.meetup.com/bcgov-uxguild/",
           "title": "BC Gov UX Guild",
@@ -75,27 +61,22 @@
       },
       {
         "sourceType": "web",
-        "resourceType": "Events",
         "sourceProperties": {
           "url": "https://www.meetup.com/Social-Club-for-Innovative-Public-Servants-SCIPS/",
           "title": "OneTeamGov Victoria, BC",
-          "description": "This meetup group hosts the Victoria Chapter of the global #OneTeamGov movement.",
-          "image": "https://secure.meetupstatic.com/photos/event/d/e/2/2/highres_480956866.jpeg"
+          "description": "This meetup group hosts the Victoria Chapter of the global #OneTeamGov movement."
         }
       },
       {
         "sourceType": "web",
-        "resourceType": "Events",
         "sourceProperties": {
           "url": "https://www.meetup.com/meetup-group-GjYRUnKV/",
           "title": "DevOps Victoria",
-          "description": "This group is about Lean IT and the DevOp mindset, we aim to explore disciplined ways of applying DevOps and how it ties into both business and IT transformation. If your interested in networking, discussions, presentations around the people, process, technologies and strategy around DevOps then please feel free to join us.",
-          "image": "https://secure.meetupstatic.com/photos/event/2/d/1/9/highres_468131545.jpeg"
+          "description": "This group is about Lean IT and the DevOp mindset, we aim to explore disciplined ways of applying DevOps and how it ties into both business and IT transformation. If your interested in networking, discussions, presentations around the people, process, technologies and strategy around DevOps then please feel free to join us."
         }
       },
       {
         "sourceType": "github",
-        "resourceType": "Events",
         "sourceProperties": {
           "url": "https://github.com/bcgov/devhub-resources/",
           "owner": "bcgov",
@@ -107,7 +88,6 @@
       },
       {
         "sourceType": "github",
-        "resourceType": "Documentation",
         "sourceProperties": {
           "url": "https://github.com/bcgov/devhub-resources/",
           "owner": "bcgov",
@@ -119,11 +99,10 @@
       },
       {
         "sourceType": "github",
-        "resourceType": "Documentation",
         "sourceProperties": {
-          "url": "https://github.com/bcgov/reggie-web/",
+          "url": "https://github.com/bcgov/reggie/",
           "owner": "bcgov",
-          "repo": "reggie-web",
+          "repo": "reggie",
           "files": [
             "UserInstructions.md"
           ]
@@ -132,11 +111,10 @@
       {
         "sourceType": "web",
         "sourceProperties": {
-          "url": "https://github.com/bcgov/reggie-web/",
+          "url": "https://github.com/bcgov/reggie/",
           "title": "Reggie - Rocket Chat Invitation App",
-          "image": ""
-        },
-        "resourceType": "Repositories"
+          "description": "description"
+        }
       }
     ]
   }
