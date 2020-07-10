@@ -13,14 +13,19 @@ Created by Patrick Simonian
 */
 // custom react hooks
 // notes on custom hooks https://reactjs.org/docs/hooks-custom.html
-import { useState, useEffect, useRef } from 'react';
-import { Index as ElasticLunr } from 'elasticlunr';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import isEqual from 'lodash/isEqual';
-import { createIam } from '../auth';
-import { isLocalHost } from './helpers';
-import { SEARCH_FIELD_NAMES, SEARCH_FIELD_MAPPING } from '../constants/search';
-import { useQuery } from '@apollo/react-hooks';
+import { useLazyQuery } from '@apollo/react-hooks';
 import { SEARCHGATE_QUERY } from '../constants/runtimeGraphqlQueries';
+import algoliasearch from 'algoliasearch/lite';
+import { ALGOLIA_INDEX_SUFFIX } from '../constants/api';
+import { useStaticQuery, graphql } from 'gatsby';
+import { flattenGatsbyGraphQL } from './dataHelpers';
+
+const searchClient = algoliasearch(
+  process.env.GATSBY_ALGOLIA_APP_ID,
+  process.env.GATSBY_ALGOLIA_SEARCH_KEY,
+);
 
 //TODO, why in a function?
 function deepCompareEquals(a, b) {
@@ -39,82 +44,33 @@ export function useDeepCompareMemoize(value) {
   return ref.current;
 }
 /**
- * custom react hook to perform a search
+ * custom react hook to perform a algolia search
  * @param {String | Array} query the query param from the url q=
- * @param {Object} staticIndex the elastic lunr index from graphql
- * notes on custom hooks https://reactjs.org/docs/hooks-custom.html
- * notes on elastic lunr implementation https://github.com/gatsby-contrib/gatsby-plugin-elasticlunr-search
  */
-export const useSearch = (query, staticIndex) => {
-  const [Index, setIndex] = useState(null);
-  const [results, setResults] = useState(null);
+export const useSearch = query => {
+  const [results, setResults] = useState([]);
+  const index = searchClient.initIndex(`Devhub-Algolia-${ALGOLIA_INDEX_SUFFIX}`);
   useEffect(() => {
-    // load or create index
-    if (Index === null) {
-      setIndex(ElasticLunr.load(staticIndex));
+    let options = {};
+    let userQuery;
+    if (query) {
+      if (query && query.includes('persona:')) {
+        userQuery = null;
+        options.facetFilters = [query];
+      } else {
+        userQuery = null;
+        options.query = query;
+        options.hitsPerPage = 200;
+      }
+      index.search(userQuery, options).then(res => {
+        setResults(res.hits);
+      });
     } else {
-      let config = {
-        fields: {
-          title: { boost: 1, expand: true, bool: 'OR' },
-          content: { boost: 1, expand: true, bool: 'OR' },
-          description: { boost: 1, expand: true, bool: 'OR' },
-          topicName: { boost: 2, expand: true, bool: 'OR' },
-          tags: { boost: 4, expand: true, bool: 'OR' },
-          personas: { boost: 1, expand: true, bool: 'OR' },
-          author: { boost: 1, expand: true, bool: 'OR' },
-        },
-      };
-      let searchQuery = query;
-
-      if (searchQuery) {
-        //splits query by ":" then filters out any empty strings etc caused by the split
-        let splitQuery = searchQuery.split(':').filter(ifTrue => ifTrue);
-        if (SEARCH_FIELD_NAMES.includes(splitQuery[0]) && splitQuery.length > 1) {
-          //map the given string to a proper field name
-          const searchField = SEARCH_FIELD_MAPPING[splitQuery[0]].text;
-          //create a custom configuration for only the given field
-          config = { fields: { [searchField]: { boost: 1, bool: 'OR', expand: true } } };
-          //delete the first element of the array, I.E the search field
-          splitQuery.shift();
-          //fix any unwanted splits in the query
-          searchQuery = splitQuery.join(':');
-        }
-      }
-      let searchResults = Index.search(searchQuery, config).map(({ ref }) =>
-        Index.documentStore.getDoc(ref),
-      );
-      if (!isEqual(results, searchResults)) {
-        // Map over each ID and return the full document
-        setResults(searchResults);
-      }
+      setResults([]);
     }
-  }, [Index, staticIndex, query, results]);
+    // eslint-disable-next-line
+  }, [query]);
   return results;
-};
-
-export const useImplicitAuth = intention => {
-  const [user, setUser] = useState({});
-
-  useEffect(() => {
-    const implicitAuthManager = createIam();
-    implicitAuthManager.registerHooks({
-      onAuthenticateSuccess: () => setUser(implicitAuthManager.getAuthDataFromLocal()),
-      onAuthenticateFail: () => setUser({}),
-      onAuthLocalStorageCleared: () => {
-        setUser({});
-      },
-    });
-
-    if (!isLocalHost()) {
-      implicitAuthManager.handleOnPageLoad();
-    }
-
-    if (intention === 'LOGOUT') {
-      implicitAuthManager.clearAuthLocalStorage();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return user;
 };
 
 /**
@@ -125,30 +81,85 @@ export const useImplicitAuth = intention => {
  * @returns {Object} {loading, results: <Array>}
  */
 export const useSearchGate = (authenticated, queryString, client) => {
-  const { data, loading } = useQuery(SEARCHGATE_QUERY, {
+  const [execute, { data, loading, error }] = useLazyQuery(SEARCHGATE_QUERY, {
     variables: {
       queryString,
     },
     client,
   });
-  const [results, setResults] = useState([]);
-  const [_loading, setLoading] = useState(true);
+
+  const results = data ? data.search : [];
 
   useEffect(() => {
-    setLoading(loading);
-
-    if (!authenticated || !queryString) {
-      setResults([]);
-    } else if (!_loading) {
-      setResults(data.search);
+    if (queryString.trim() !== '' && authenticated) {
+      execute();
     }
+  }, [execute, queryString, authenticated]);
 
-    return () => {
-      setResults([]);
-    };
-    //Reminder - Ask patrick about this
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, useDeepCompareMemoize([_loading, loading, authenticated, queryString, results]));
+  return { results, loading: error ? false : loading, authenticated, error };
+};
 
-  return { results, loading: _loading, authenticated };
+/**
+ * returns a list of of siphon and github raw nodes in the format [siphonNodes, githubrawNodes]
+ * this function leverages gatsby's static query hook
+ */
+export const useDevhubSiphonAndGithubRawNodes = () => {
+  const { allDevhubSiphon, allGithubRaw } = useStaticQuery(graphql`
+    query {
+      allGithubRaw(filter: { fields: { pageOnly: { eq: false } } }) {
+        edges {
+          node {
+            id
+            pageViews
+            html_url
+            fields {
+              resourceType
+              title
+              description
+              image {
+                ...cardFixedImage
+              }
+              pagePaths
+              standAlonePath
+              slug
+              personas
+            }
+            internal {
+              type
+            }
+            childMarkdownRemark {
+              htmlAst
+              html
+            }
+          }
+        }
+      }
+      allDevhubSiphon(filter: { source: { type: { eq: "web" } } }) {
+        edges {
+          node {
+            id
+            internal {
+              type
+            }
+            fields {
+              resourceType
+              personas
+              title
+              description
+              image {
+                ...cardFixedImage
+              }
+              pagePaths
+              standAlonePath
+            }
+          }
+        }
+      }
+    }
+  `);
+  const siphon = useMemo(() => flattenGatsbyGraphQL(allDevhubSiphon.edges), [
+    allDevhubSiphon.edges,
+  ]);
+  const githubRaw = useMemo(() => flattenGatsbyGraphQL(allGithubRaw.edges), [allGithubRaw.edges]);
+  return [siphon, githubRaw];
 };

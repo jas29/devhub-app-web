@@ -219,7 +219,6 @@ const createResourceTopicsPages = async (createPage, graphql) => {
   data.data.allGithubRaw.edges.forEach(({ node }) => {
     // create a page based on the github raw node and the topics its connected too
     createResourceInTopicsPages(node, createPage);
-    // create individual pages here (in future releases)
   });
 };
 
@@ -264,7 +263,7 @@ const createStandAlonePage = async (createPage, graphql) => {
  * is creates a placeholder page
  * @param {Function} createPage the gatsby createpage function
  */
-const createEventsPage = createPage => {
+const createEventsPage = async createPage => {
   let eventComponent = resolvePath('../src/templates/events.js');
   let pastEventComponent = resolvePath('../src/templates/pastEvents.js');
   //if (!process.env.EVENT_BRITE_API_KEY || !process.env.MEETUP_API_KEY) {
@@ -287,9 +286,10 @@ const createEventsPage = createPage => {
 module.exports = async ({ graphql, actions }) => {
   const { createPage } = actions;
 
-  createResourceTypePages(createPage);
-  createResourceTopicsPages(createPage, graphql);
-  createEventsPage(createPage);
-  createStandAlonePage(createPage, graphql);
-  createJourneyPages(createPage, graphql);
+  await createResourceTypePages(createPage);
+  await createResourceTopicsPages(createPage, graphql);
+  await createEventsPage(createPage);
+  await createStandAlonePage(createPage, graphql);
+  // journeys should be created similarly to topics so we cann filter out conflicting github nodes
+  await createJourneyPages(createPage, graphql);
 };

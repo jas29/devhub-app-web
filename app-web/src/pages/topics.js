@@ -20,9 +20,8 @@ import React, { useState, useEffect } from 'react';
 import { TOPICS_PAGE } from '../messages';
 import { flattenGatsbyGraphQL } from '../utils/dataHelpers';
 import { Title } from '../components/Page';
-import TopicPreview from '../components/TopicPreview/TopicPreview';
+import Topic from '../components/Topic';
 import Main from '../components/Page/Main';
-import withResourceQuery from '../hoc/withResourceQuery';
 import Layout from '../hoc/Layout';
 import { getFirstNonExternalResource, reduceNodeForTableOfContents } from '../utils/helpers';
 import TableOfContents, {
@@ -32,6 +31,12 @@ import TableOfContents, {
   viewToggle,
 } from '../components/TableOfContents/TableOfContents';
 import { JOURNEY_TOPIC_VIEW_MODES as VIEW_MODES } from '../constants/ui';
+
+export const TEST_IDS = {
+  toggle: 'topic-page-view-toggle',
+  cardView: 'topic-page-view-card',
+  listView: 'topic-page-view-list',
+};
 
 export const TopicsPage = ({ data, location }) => {
   let topics = flattenGatsbyGraphQL(data.allTopicRegistryJson.edges);
@@ -53,9 +58,9 @@ export const TopicsPage = ({ data, location }) => {
   // non external link to use as the entry page for the topic card
   const currentView =
     viewMode === VIEW_MODES.card ? (
-      <main>
+      <div data-testid={TEST_IDS.cardView}>
         {topics.map(topic => (
-          <TopicPreview
+          <Topic
             key={topic.id}
             title={topic.name}
             description={topic.description}
@@ -66,21 +71,18 @@ export const TopicsPage = ({ data, location }) => {
             }}
           />
         ))}
-      </main>
+      </div>
     ) : (
-      <main>
-        <AccordionList style={{ padding: '20px' }}>
-          {topics.map(topic => (
-            <OutsideBorder key={topic.id}>
-              <TableOfContents
-                key={topic.id}
-                title={topic.name}
-                contents={topic.connectsWith.map(reduceNodeForTableOfContents)}
-              />
-            </OutsideBorder>
-          ))}
-        </AccordionList>
-      </main>
+      <AccordionList style={{ padding: '20px' }} data-testid={TEST_IDS.listView}>
+        {topics.map(topic => (
+          <OutsideBorder key={topic.id}>
+            <TableOfContents
+              title={topic.name}
+              contents={topic.connectsWith.map(reduceNodeForTableOfContents)}
+            />
+          </OutsideBorder>
+        ))}
+      </AccordionList>
     );
   return (
     <Layout>
@@ -91,6 +93,7 @@ export const TopicsPage = ({ data, location }) => {
         />
         <TableOfContentsToggle
           onChange={() => viewToggle(location.pathname, viewMode)}
+          data-testid={TEST_IDS.toggle}
           viewMode={viewMode}
         />
         {currentView}
@@ -99,4 +102,21 @@ export const TopicsPage = ({ data, location }) => {
   );
 };
 
-export default withResourceQuery(TopicsPage)();
+export default TopicsPage;
+
+export const TopicsQuery = graphql`
+  query {
+    allTopicRegistryJson {
+      edges {
+        node {
+          id
+          name
+          description
+          connectsWith {
+            ...DevhubNodeConnection
+          }
+        }
+      }
+    }
+  }
+`;

@@ -15,9 +15,10 @@ limitations under the License.
 
 Created by Patrick Simonian
 */
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { navigate } from 'gatsby';
+import { useKeycloak } from '@react-keycloak/web';
 import styled from '@emotion/styled';
 import { Alert } from 'reactstrap';
 import { css } from '@emotion/core';
@@ -27,7 +28,7 @@ import { EMOTION_BOOTSTRAP_BREAKPOINTS, SPACING } from '../../constants/designTo
 import Search from '../Search';
 import AppLogo from '../UI/AppLogo/AppLogo';
 import { SearchSources } from '../Search/SearchSources';
-import AuthContext from '../../AuthContext';
+import AlgoliaBrand from '../UI/AlgoliaBrand';
 
 const SearchStyled = styled(Search)`
   font-size: 1.25em;
@@ -65,10 +66,12 @@ const IconDiv = styled.div`
 `;
 export const TEST_IDS = {
   alertBox: 'Masthead.show',
+  algolia: 'Masthead.algolia',
 };
 
-export const Masthead = ({ query, searchSourcesLoading }) => {
-  const { isAuthenticated } = useContext(AuthContext);
+export const Masthead = ({ query, searchSourcesLoading, location }) => {
+  const [keycloak] = useKeycloak();
+  const isAuthenticated = keycloak && keycloak.authenticated;
   const [alertHasBeenAcknowledged, setAlertHasBeenAcknowledged] = useState(false);
 
   const onDismiss = () => {
@@ -111,7 +114,7 @@ export const Masthead = ({ query, searchSourcesLoading }) => {
           query={query}
           inputConfig={SEARCH.INPUT}
           onSearch={terms => {
-            navigate(`/?q=${encodeURIComponent(terms)}`);
+            navigate(`${location.pathname}?q=${encodeURIComponent(terms.trim())}`);
           }}
         />
         <IconDiv>{query && <SearchSources searchSourcesLoading={searchSourcesLoading} />}</IconDiv>
@@ -127,6 +130,7 @@ export const Masthead = ({ query, searchSourcesLoading }) => {
           logged in.
         </AlertMessage>
       )}
+      <AlgoliaBrand data-testid={TEST_IDS.algolia} style={{ paddingBottom: '5px' }} />
     </Container>
   );
 };
@@ -135,6 +139,7 @@ Masthead.propTypes = {
   query: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.string), PropTypes.string]),
   resultCount: PropTypes.number,
   searchSourcesLoading: PropTypes.bool,
+  location: PropTypes.shape({ pathname: PropTypes.string }),
 };
 
 export default Masthead;

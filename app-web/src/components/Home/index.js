@@ -29,6 +29,5 @@ export const StyledLink = styled(Link)`
   }
 `;
 
-export { TopicsContainer } from './TopicsContainer';
+export { TopicsPreview } from './TopicsPreview';
 export { Masthead } from './Masthead';
-export { ResourcePreview } from './ResourcePreview';

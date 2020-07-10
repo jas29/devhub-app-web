@@ -14,7 +14,7 @@ import { RESOURCE_TYPE_PAGES } from '../messages';
 // components
 import Filters from '../components/Filters/Filters';
 import Layout from '../hoc/Layout';
-import withResourceQuery from '../hoc/withResourceQuery';
+
 import { CardsContainer, PageContainer, Title, Main, FilterMenu } from '../components/Page';
 import SideDrawer from '../components/SideDrawer/SideDrawer';
 import NoResources from '../components/UI/NoResources/NoResources';
@@ -31,17 +31,14 @@ import {
   isFilterLonely,
   removeOtherResourceTypeResults,
 } from '../utils/helpers';
+import { graphql } from 'gatsby';
 
 // create a selector instance from the selectResourcesGroupedByType
 const resourcesSelector = selectResourcesGroupedByType();
 
 // generic template page where all 'resource type' pages are generated from
 export const ResourceType = ({
-  data: {
-    allGithubRaw,
-    allDevhubSiphon,
-    siteSearchIndex: { index },
-  },
+  data: { allGithubRaw, allDevhubSiphon, allJourneyRegistryJson, allTopicRegistryJson },
   pageContext, // received from gatsby create pages api, view gatsby/createPages.js for more info
   location,
 }) => {
@@ -60,7 +57,7 @@ export const ResourceType = ({
     query = '';
   }
 
-  results = useSearch(query, index);
+  results = useSearch(query);
   // this is defined by ?q='' or ?q=''&q=''..etc
   // if query is empty we prevent the search results empty from being rendered
   // in addition the topics container is prevented from not rendering because
@@ -69,6 +66,8 @@ export const ResourceType = ({
   const resourceTypeConst = RESOURCE_TYPES[pageContext.resourceTypeConst];
   const nodes = flattenGatsbyGraphQL(allDevhubSiphon.edges).concat(
     flattenGatsbyGraphQL(allGithubRaw.edges),
+    flattenGatsbyGraphQL(allJourneyRegistryJson.edges),
+    flattenGatsbyGraphQL(allTopicRegistryJson.edges),
   );
 
   const resourcesByType = resourcesSelector(nodes);
@@ -162,4 +161,92 @@ export const ResourceType = ({
   );
 };
 
-export default withResourceQuery(ResourceType)();
+export default ResourceType;
+
+export const ResourceTypeQuery = graphql`
+  query($resourceType: String) {
+    allGithubRaw(
+      filter: { fields: { pageOnly: { eq: false }, resourceType: { eq: $resourceType } } }
+    ) {
+      edges {
+        node {
+          id
+          pageViews
+          html_url
+          fields {
+            resourceType
+            title
+            description
+            image {
+              ...cardFixedImage
+            }
+            pagePaths
+            standAlonePath
+            slug
+            personas
+          }
+        }
+      }
+    }
+    allDevhubSiphon(
+      filter: { source: { type: { eq: "web" } }, fields: { resourceType: { eq: $resourceType } } }
+    ) {
+      edges {
+        node {
+          id
+          name
+          owner
+          parent {
+            id
+          }
+          fields {
+            resourceType
+            personas
+            title
+            description
+            image {
+              ...cardFixedImage
+            }
+            pagePaths
+            standAlonePath
+          }
+        }
+      }
+    }
+    allJourneyRegistryJson {
+      edges {
+        node {
+          id
+          name
+          fields {
+            resourceType
+            standAlonePath
+            slug
+            description
+          }
+          internal {
+            type
+          }
+        }
+      }
+    }
+    allTopicRegistryJson {
+      edges {
+        node {
+          id
+          name
+          fields {
+            resourceType
+            standAlonePath
+            slug
+            description
+          }
+          description
+          internal {
+            type
+          }
+        }
+      }
+    }
+  }
+`;

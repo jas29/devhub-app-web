@@ -22,9 +22,6 @@ const withResourceQuery = WrappedComponent => () => props => (
   <StaticQuery
     query={graphql`
       query resourceQuery {
-        siteSearchIndex {
-          index
-        }
         allGithubRaw(filter: { fields: { pageOnly: { eq: false } } }) {
           edges {
             node {
@@ -35,7 +32,9 @@ const withResourceQuery = WrappedComponent => () => props => (
                 resourceType
                 title
                 description
-                image
+                image {
+                  ...cardFixedImage
+                }
                 pagePaths
                 standAlonePath
                 slug
@@ -179,9 +178,7 @@ const withResourceQuery = WrappedComponent => () => props => (
               id
               name
               owner
-              fields {
-                standAlonePath
-              }
+
               parent {
                 id
               }
@@ -190,7 +187,9 @@ const withResourceQuery = WrappedComponent => () => props => (
                 personas
                 title
                 description
-                image
+                image {
+                  ...cardFixedImage
+                }
                 pagePaths
                 standAlonePath
               }

@@ -3,6 +3,7 @@ import { render, cleanup } from '@testing-library/react';
 import queryString from 'query-string';
 import { ThemeProvider } from 'emotion-theming';
 import theme from '../../theme';
+import { useStaticQuery } from 'gatsby';
 import { Index, TEST_IDS } from '../../src/pages/index';
 import {
   SIPHON_NODES,
@@ -13,12 +14,9 @@ import {
   JOURNEYS,
   POPULAR_TOPIC,
 } from '../../__fixtures__/nodes';
-import {
-  SELECT_TOPICS_WITH_RESOURCES_GROUPED_BY_TYPE,
-  SELECT_RESOURCES_GROUPED_BY_TYPE,
-} from '../../__fixtures__/selector-fixtures';
-import { useSearch, useSearchGate, useImplicitAuth } from '../../src/utils/hooks';
-import { TEST_IDS as TOPIC_TEST_IDS } from '../../src/components/Home/TopicsContainer';
+
+import { useSearch, useSearchGate, useDevhubSiphonAndGithubRawNodes } from '../../src/utils/hooks';
+import { TEST_IDS as TOPIC_TEST_IDS } from '../../src/components/Home/TopicsPreview';
 import { TEST_IDS as RESOURCE_PREVIEW_TEST_IDS } from '../../src/components/Home/ResourcePreview';
 import {
   getFirstNonExternalResource,
@@ -32,12 +30,17 @@ import { GITHUB_RAW_NODES } from '../../__fixtures__/nodes';
 import { client } from '../../wrapWithProvider';
 import { ApolloProvider } from 'react-apollo';
 import { ROCKET_CHAT, GITHUB, DOCUMIZE } from '../../__fixtures__/searchsources';
-import { AuthProvider } from '../../src/AuthContext';
+
 // this adds custom jest matchers from jest-dom
 jest.mock('query-string');
 // mock out layout
 jest.mock('../../src/hoc/Layout.js', () => ({ children }) => children);
 // mock out search hook
+
+jest.mock('@reach/router', () => ({
+  Location: ({ children }) => children({ location: { pathname: '/', search: '' } }),
+}));
+
 jest.mock('../../src/utils/hooks.js');
 
 jest.mock('../../src/utils/helpers.js');
@@ -46,26 +49,12 @@ getFirstNonExternalResource.mockReturnValue('foo');
 getTextAndLink.mockReturnValue({ to: '/documentation?q=mobile', text: 'two results found' });
 useSearchGate.mockReturnValue({ results: [], loading: false });
 // jwt time stamps are in seconds. dividing by 1000 to convert date.now ms to s
-const currentDate = Date.now() / 1000;
-useImplicitAuth.mockReturnValue({
-  idToken: {
-    data: {
-      exp: currentDate - 50000, // expiry set to be in the past
-    },
-  },
-});
+
 buildFeaturedTopic.mockReturnValue({ node: FEATURED_TOPIC });
 buildPopularTopic.mockReturnValue({ node: POPULAR_TOPIC });
 reduceJourneyToSubwayLine.mockReturnValue([{ name: 'foo' }]);
 
 describe('Home Page', () => {
-  // mock out non redux selectors
-  jest.doMock('../../src/utils/selectors.js', () => ({
-    selectResourcesGroupedByType: jest.fn(() => SELECT_RESOURCES_GROUPED_BY_TYPE),
-    selectTopicsWithResourcesGroupedByType: jest.fn(
-      () => SELECT_TOPICS_WITH_RESOURCES_GROUPED_BY_TYPE,
-    ),
-  }));
   // when you use graphql to load data into the component
   // all edges are an object of { node: [graphql object]}
   // the topics fixture is the true data without this extra object field
@@ -77,11 +66,17 @@ describe('Home Page', () => {
   const meetups = MEETUP_NODES.map(c => ({ node: c }));
   const githubRaw = GITHUB_RAW_NODES.map(c => ({ node: c }));
   const journeys = JOURNEYS.map(c => ({ node: c }));
+  useDevhubSiphonAndGithubRawNodes.mockReturnValue([nodes, githubRaw]);
+  useStaticQuery.mockReturnValue({ topics: { edges: topics } });
+
   const props = {
     client: {},
     data: {
       allJourneyRegistryJson: {
         edges: journeys,
+      },
+      allTopicRegistryJson: {
+        edges: topics,
       },
       allDevhubSiphon: {
         edges: nodes,
@@ -89,17 +84,11 @@ describe('Home Page', () => {
       allGithubRaw: {
         edges: githubRaw,
       },
-      allTopicRegistryJson: {
-        edges: topics,
-      },
       allEventbriteEvents: {
         edges: events,
       },
       allMeetupGroup: {
         edges: meetups,
-      },
-      siteSearchIndex: {
-        index: {},
       },
       allMarkdownRemark: {
         edges: githubRaw,
@@ -116,13 +105,10 @@ describe('Home Page', () => {
 
   test('it matches snapshot, when there is a search and no results an alert box shows up', () => {
     queryString.parse.mockReturnValue({});
-
     const { container, rerender, queryByTestId } = render(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} />
-          </AuthProvider>
+          <Index {...props} />
         </ApolloProvider>
       </ThemeProvider>,
     );
@@ -135,13 +121,12 @@ describe('Home Page', () => {
     queryString.parse.mockReturnValue({ q: 'foo' });
     // rerender stubbing no results for resources
     useSearch.mockReturnValue([]);
+    useSearchGate.mockReturnValue({ results: [], loading: false });
     removeUnwantedResults.mockReturnValue([]);
     rerender(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} />
-          </AuthProvider>
+          <Index {...props} />
         </ApolloProvider>
       </ThemeProvider>,
     );
@@ -159,9 +144,7 @@ describe('Home Page', () => {
     const { rerender, queryByTestId } = render(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} />
-          </AuthProvider>
+          <Index {...props} />
         </ApolloProvider>
       </ThemeProvider>,
     );
@@ -176,9 +159,7 @@ describe('Home Page', () => {
     rerender(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} />
-          </AuthProvider>
+          <Index {...props} />
         </ApolloProvider>
       </ThemeProvider>,
     );
@@ -193,9 +174,7 @@ describe('Home Page', () => {
     const { container, rerender, queryByTestId, queryAllByTestId } = render(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} />
-          </AuthProvider>
+          <Index {...props} />
         </ApolloProvider>
       </ThemeProvider>,
     );
@@ -211,9 +190,7 @@ describe('Home Page', () => {
     rerender(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} />
-          </AuthProvider>
+          <Index {...props} />
         </ApolloProvider>
       </ThemeProvider>,
     );
@@ -234,9 +211,7 @@ describe('Home Page', () => {
     const { queryByTestId, queryAllByTestId } = render(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} />
-          </AuthProvider>
+          <Index {...props} />
         </ApolloProvider>
       </ThemeProvider>,
     );
@@ -249,19 +224,10 @@ describe('Home Page', () => {
     queryString.parse.mockReturnValue({});
     useSearch.mockReturnValue([]);
 
-    useImplicitAuth.mockReturnValue({
-      idToken: {
-        data: {
-          exp: currentDate - 50000, // expiry set to be in the past
-        },
-      },
-    });
     const { getByTestId } = render(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} />
-          </AuthProvider>
+          <Index {...props} />
         </ApolloProvider>
       </ThemeProvider>,
     );
@@ -286,33 +252,16 @@ describe('Home Page', () => {
     queryString.parse.mockReturnValue({ q: 'foo' });
     useSearch.mockReturnValue([]);
     useSearchGate.mockReturnValue({ results: ROCKET_CHAT, loading: false });
-    useImplicitAuth.mockReturnValue({
-      idToken: {
-        data: {
-          exp: currentDate + 50000, // expiry set to be in the past
-        },
-      },
-    });
 
     const { queryByTestId, rerender } = render(
       <ThemeProvider theme={theme}>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Index {...props} location={{ search: '?q=foo' }} />
-          </AuthProvider>
+          <Index {...props} location={{ search: '?q=foo' }} />
         </ApolloProvider>
       </ThemeProvider>,
     );
 
     expect(queryByTestId(ROCKET_CHAT[0].id)).toBeInTheDocument();
-
-    useImplicitAuth.mockReturnValue({
-      idToken: {
-        data: {
-          exp: currentDate - 50000, // expiry set to be in the past
-        },
-      },
-    });
 
     rerender();
 
@@ -341,6 +290,7 @@ describe('Home Page', () => {
 
     expect(queryByTestId(ROCKET_CHAT[0].id)).not.toBeInTheDocument();
   });
+
   test('shows documize results in different authenticated status', () => {
     queryString.parse.mockReturnValue({ q: 'openshift' });
     useSearch.mockReturnValue([]);

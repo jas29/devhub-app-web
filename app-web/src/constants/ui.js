@@ -5,6 +5,8 @@ export const RESOURCE_TYPES = {
   REPOSITORIES: 'Repositories',
   PEOPLE: 'People',
   EVENTS: 'Events',
+  TOPICS: 'Topics',
+  JOURNEY: 'Journey',
 };
 
 export const SEARCH_RESOURCE_TYPES = {
@@ -96,10 +98,13 @@ export const DYNAMIC_TOPIC_PATHS = {
 // an expressed in order by this object
 // this is a lookup table to easily identify which resources are considered featured
 export const FEATURED_CONTENT = [
+  'Exchange Lab Ops Learning Programs',
+  'BCDevExchange Platform Status Page',
   'BC Developers Exchange',
   'Chat Channel Conventions',
   'Steps to join Pathfinder Rocket.Chat',
   '12 Factor Apps',
+  'Contributing To The Devhub',
   'Progressive Web Apps',
   'Documize',
   'What is Pathfinder?',

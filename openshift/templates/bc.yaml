@@ -41,12 +41,12 @@ objects:
     postCommit: {}
     runPolicy: SerialLatestOnly
     resources:
-      requests:
-        cpu: 1
-        memory: 1.5Gi
       limits:
-        cpu: 2
-        memory: 9Gi
+        cpu: 1
+        memory: 7Gi
+      requests:
+        cpu: 200m
+        memory: 4536Mi
     source:
       git:
         uri: ${SOURCE_REPOSITORY_URL}
@@ -65,6 +65,23 @@ objects:
               secretKeyRef:
                 name: devhub-gh-token
                 key: GITHUB_TOKEN
+          - name: GATSBY_ALGOLIA_APP_ID
+            valueFrom:
+              secretKeyRef:
+                name: devhub-algolia-build
+                key: GATSBY_ALGOLIA_APP_ID
+          - name: ALGOLIA_ADMIN_KEY
+            valueFrom:
+              secretKeyRef:
+                name: devhub-algolia-build
+                key: ALGOLIA_ADMIN_KEY
+          - name: GATSBY_ALGOLIA_SEARCH_KEY
+            valueFrom:
+              secretKeyRef:
+                name: devhub-algolia-build
+                key: GATSBY_ALGOLIA_SEARCH_KEY
+          - name: GATSBY_ALGOLIA_INDEX_NAME_SUFFIX
+            value: ${SUFFIX}
           - name: MEETUP_API_KEY
             valueFrom: 
               secretKeyRef:
