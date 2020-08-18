@@ -1,36 +1,17 @@
 {
-  "name": "Agile Delivery Process",
-  "description": "An agile process for teams to deliver digital services",
+  "name": "agile delivery process",
+  "description": "BC Government's home on GitHub. Open source code developed by and for the BC Government resides here.",
   "sourceProperties": {
     "sources": [
       {
-        "sourceType": "github",
+        "sourceType": "web",
         "sourceProperties": {
-          "url": "https://github.com/bcgov/Agile-Delivery-Process",
-          "owner": "bcgov",
-          "repo": "Agile-Delivery-Process",
-          "files": [
-            "README.md",
-            "01_Alignment.md",
-            "02_Discovery.md",
-            "03_Alpha.md",
-            "04_Beta.md",
-            "05_Live.md"
-          ]
-        }
+          "url": "https://github.com",
+          "title": "title",
+          "description": "some source description"
+        },
+        "resourceType": "Components"
       }
     ]
-  },
-  "attributes": {
-    "labels": [
-      "Documentation",
-      "Repository"
-    ],
-    "personas": [
-      "Designer",
-      "Developer",
-      "Product Owner"
-    ]
-  },
-  "resourceType": "Documentation"
+  }
 }
